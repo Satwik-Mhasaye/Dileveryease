@@ -14,6 +14,11 @@ import DeliveryModal from './components/DeliveryModal';
 import DriverModal from './components/DriverModal';
 import TrackOrderModal from './components/TrackOrderModal';
 import DriverDashboard from './components/DriverDashboard';
+import DriverRegister from './components/DriverRegister';
+import ServicesPage from './components/ServicesPage';
+import HowItWorksPage from './components/HowItWorksPage';
+import AboutPage from './components/AboutPage';
+import ContactPage from './components/ContactPage';
 
 interface AuthState {
   isAuthenticated: boolean;
@@ -51,10 +56,10 @@ function App() {
   return (
     <Router>
       <div className="App">
-        <Navbar authState={authState} logout={logout} />
         <Routes>
           <Route path="/" element={
             <>
+              <Navbar authState={authState} logout={logout} />
               <Hero />
               <Services />
               <HowItWorks />
@@ -69,7 +74,24 @@ function App() {
               <TrackOrderModal />
             </>
           } />
-          <Route path="/driver-dashboard" element={<DriverDashboard />} />
+          <Route path="/services" element={<ServicesPage />} />
+          <Route path="/how-it-works" element={<HowItWorksPage />} />
+          <Route path="/about" element={<AboutPage />} />
+          <Route path="/contact" element={<ContactPage />} />
+          <Route path="/driver-dashboard" element={
+            <div>
+              <Navbar authState={authState} logout={logout} />
+              <DriverDashboard authState={authState} />
+              <Footer />
+            </div>
+          } />
+          <Route path="/driver-register" element={
+            <div>
+              <Navbar authState={authState} logout={logout} />
+              <DriverRegister />
+              <Footer />
+            </div>
+          } />
         </Routes>
       </div>
     </Router>

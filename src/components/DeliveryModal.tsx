@@ -23,10 +23,15 @@ const DeliveryModal: React.FC = () => {
   const fetchAvailableDrivers = async () => {
     setLoadingDrivers(true);
     try {
+      console.log('Fetching available drivers...');
       const response = await fetch('http://localhost:5000/api/drivers/available');
       const data = await response.json();
+      console.log('API Response:', data);
       if (data.success) {
         setDrivers(data.drivers);
+        console.log('Drivers set:', data.drivers);
+      } else {
+        console.log('API did not return success');
       }
     } catch (error) {
       console.error('Error fetching drivers:', error);

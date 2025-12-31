@@ -30,32 +30,70 @@ interface Order {
   createdAt: string;
 }
 
-const DriverDashboard: React.FC = () => {
+interface AuthState {
+  isAuthenticated: boolean;
+  user: any;
+  token: string | null;
+}
+
+interface DriverDashboardProps {
+  authState: AuthState;
+}
+
+const DriverDashboard: React.FC<DriverDashboardProps> = ({ authState }) => {
   const [availableOrders, setAvailableOrders] = useState<Order[]>([]);
   const [acceptedOrders, setAcceptedOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState<'available' | 'accepted'>('available');
+  const [activeTab, setActiveTab] = useState<'available' | 'accepted'>('accepted');
+  const [driverId, setDriverId] = useState<string | null>(null);
 
   useEffect(() => {
-    fetchOrders();
-  }, []);
+    if (!authState.isAuthenticated || authState.user?.role !== 'driver') {
+      // Redirect to login or show error
+      alert('Please login as a driver to access this page');
+      window.location.href = '/';
+      return;
+    }
+
+    fetchDriverProfile();
+  }, [authState]);
+
+  useEffect(() => {
+    if (driverId) {
+      fetchOrders();
+    }
+  }, [driverId]);
+
+  const fetchDriverProfile = async () => {
+    try {
+      const response = await fetch(`http://localhost:5000/api/drivers/profile/${authState.user.email}`);
+      const data = await response.json();
+
+      if (response.ok && data.success) {
+        setDriverId(data.driver._id);
+      } else {
+        alert('Driver profile not found');
+        window.location.href = '/';
+      }
+    } catch (error) {
+      console.error('Error fetching driver profile:', error);
+      alert('Error loading driver profile');
+    }
+  };
 
   const fetchOrders = async () => {
+    if (!driverId) return;
+
     try {
-      // Fetch available orders
-      const availableResponse = await fetch('http://localhost:5000/api/deliveries?status=assigned');
-      const availableData = await availableResponse.json();
+      // Fetch driver's assigned orders
+      const response = await fetch(`http://localhost:5000/api/deliveries/driver/${driverId}`);
+      const data = await response.json();
 
-      // Fetch driver's accepted orders (in a real app, this would be filtered by driver ID)
-      const acceptedResponse = await fetch('http://localhost:5000/api/deliveries?status=inTransit');
-      const acceptedData = await acceptedResponse.json();
-
-      if (availableResponse.ok) {
-        setAvailableOrders(availableData.deliveries || []);
-      }
-
-      if (acceptedResponse.ok) {
-        setAcceptedOrders(acceptedData.deliveries || []);
+      if (response.ok && data.success) {
+        const deliveries = data.deliveries || [];
+        // Separate assigned (available to accept) and pickedUp/inTransit (accepted)
+        setAvailableOrders(deliveries.filter((order: Order) => order.status === 'assigned'));
+        setAcceptedOrders(deliveries.filter((order: Order) => ['pickedUp', 'inTransit', 'delivered'].includes(order.status)));
       }
     } catch (error) {
       console.error('Error fetching orders:', error);

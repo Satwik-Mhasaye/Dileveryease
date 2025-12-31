@@ -15,13 +15,8 @@ const DriverModal: React.FC<DriverModalProps> = ({ login }) => {
   };
 
   const switchToRegister = () => {
-    const loginModal = document.getElementById('driverModal') as HTMLElement;
-    const registerModal = document.getElementById('registerModal') as HTMLElement;
-
-    if (loginModal && registerModal) {
-      loginModal.classList.remove('active');
-      registerModal.classList.add('active');
-    }
+    closeModal();
+    navigate('/driver-register');
   };
 
   const handleLogin = async (e: React.FormEvent) => {

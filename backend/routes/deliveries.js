@@ -76,6 +76,7 @@ router.post('/', [
     }
 
     if (selectedDriver) {
+      deliveryData.driverId = selectedDriver._id;
       deliveryData.driver = {
         name: `${selectedDriver.firstName} ${selectedDriver.lastName}`,
         phone: selectedDriver.phone,
@@ -90,6 +91,7 @@ router.post('/', [
     }
 
     const delivery = new Delivery(deliveryData);
+    delivery.updatedAt = Date.now();
     await delivery.save();
 
     res.status(201).json({
@@ -210,6 +212,25 @@ router.get('/', async (req, res) => {
     });
   } catch (error) {
     console.error('Error fetching deliveries:', error);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
+// @route   GET /api/deliveries/driver/:driverId
+// @desc    Get deliveries assigned to a specific driver
+// @access  Public (should be protected in production)
+router.get('/driver/:driverId', async (req, res) => {
+  try {
+    const { driverId } = req.params;
+    const deliveries = await Delivery.find({ driverId }).sort({ createdAt: -1 });
+
+    res.json({
+      success: true,
+      count: deliveries.length,
+      deliveries: deliveries
+    });
+  } catch (error) {
+    console.error('Error fetching driver deliveries:', error);
     res.status(500).json({ error: 'Server error' });
   }
 });

@@ -1,5 +1,6 @@
 const express = require('express');
 const jwt = require('jsonwebtoken');
+const bcrypt = require('bcryptjs');
 const { body, validationResult } = require('express-validator');
 const User = require('../models/User');
 const Driver = require('../models/Driver');
@@ -40,13 +41,17 @@ router.post('/register', [
       return res.status(400).json({ error: 'User already exists with this email' });
     }
 
+    // Hash password
+    const salt = await bcrypt.genSalt(12);
+    const hashedPassword = await bcrypt.hash(password, salt);
+
     // Create new user
     const user = new User({
       firstName,
       lastName,
       email,
       phone,
-      password,
+      password: hashedPassword,
       role: role || 'customer'
     });
 
@@ -159,6 +164,16 @@ router.post('/driver/register', [
       return res.status(400).json({ error: 'Driver already exists with this email or license number' });
     }
 
+    // Check if user already exists
+    const existingUser = await User.findOne({ email });
+    if (existingUser) {
+      return res.status(400).json({ error: 'User already exists with this email' });
+    }
+
+    // Hash password
+    const salt = await bcrypt.genSalt(12);
+    const hashedPassword = await bcrypt.hash(password, salt);
+
     // Create driver profile
     const driver = new Driver({
       firstName,
@@ -179,7 +194,7 @@ router.post('/driver/register', [
       lastName,
       email,
       phone,
-      password,
+      password: hashedPassword,
       role: 'driver'
     });
 
@@ -206,7 +221,7 @@ router.post('/driver/register', [
     if (error.code === 11000) {
       return res.status(400).json({ error: 'Email or license number already exists' });
     }
-    res.status(500).json({ error: 'Server error' });
+    res.status(500).json({ error: error.message });
   }
 });
 

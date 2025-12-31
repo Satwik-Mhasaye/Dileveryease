@@ -34,11 +34,8 @@ const Navbar: React.FC<NavbarProps> = ({ authState, logout }) => {
     }
   };
 
-  const scrollToSection = (sectionId: string) => {
-    const element = document.getElementById(sectionId);
-    if (element) {
-      element.scrollIntoView({ behavior: 'smooth' });
-    }
+  const handleNavigation = (path: string) => {
+    navigate(path);
     setIsMenuOpen(false);
   };
 
@@ -50,11 +47,11 @@ const Navbar: React.FC<NavbarProps> = ({ authState, logout }) => {
           <span>SwiftDeliver</span>
         </div>
         <ul className={`nav-links ${isMenuOpen ? 'active' : ''}`} id="navLinks">
-          <li><a href="#" onClick={() => scrollToSection('home')} className="active">Home</a></li>
-          <li><a href="#" onClick={() => scrollToSection('services')}>Services</a></li>
-          <li><a href="#" onClick={() => scrollToSection('how-it-works')}>How It Works</a></li>
-          <li><a href="#" onClick={() => scrollToSection('about')}>About Us</a></li>
-          <li><a href="#" onClick={() => scrollToSection('contact')}>Contact</a></li>
+          <li><a href="#" onClick={() => handleNavigation('/')} className="active">Home</a></li>
+          <li><a href="#" onClick={() => handleNavigation('/services')}>Services</a></li>
+          <li><a href="#" onClick={() => handleNavigation('/how-it-works')}>How It Works</a></li>
+          <li><a href="#" onClick={() => handleNavigation('/about')}>About Us</a></li>
+          <li><a href="#" onClick={() => handleNavigation('/contact')}>Contact</a></li>
           <li><a href="#" onClick={openTrackModal}>Track Order</a></li>
           <li className="driver-link">
             <a href="#" className="driver-btn" onClick={openDriverModal}>

@@ -26,6 +26,10 @@ const deliverySchema = new mongoose.Schema({
     enum: ['booked', 'assigned', 'pickedUp', 'inTransit', 'delivered'],
     default: 'booked'
   },
+  driverId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Driver'
+  },
   driver: {
     name: { type: String },
     phone: { type: String },
@@ -53,10 +57,6 @@ const deliverySchema = new mongoose.Schema({
   }
 });
 
-// Update the updatedAt field before saving
-deliverySchema.pre('save', function(next) {
-  this.updatedAt = Date.now();
-  next();
-});
+
 
 module.exports = mongoose.model('Delivery', deliverySchema);

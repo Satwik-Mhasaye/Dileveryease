@@ -28,10 +28,14 @@ router.get('/', async (req, res) => {
 // @access  Public
 router.get('/available', async (req, res) => {
   try {
+    console.log('Fetching available drivers...');
     const availableDrivers = await Driver.find({
       isAvailable: true,
       isVerified: true
     }).select('firstName lastName phone vehicleType rating totalDeliveries');
+
+    console.log('Available drivers query result:', availableDrivers);
+    console.log('Number of drivers found:', availableDrivers.length);
 
     res.json({
       success: true,
@@ -65,6 +69,29 @@ router.get('/:id', async (req, res) => {
     if (error.kind === 'ObjectId') {
       return res.status(404).json({ error: 'Driver not found' });
     }
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
+// @route   GET /api/drivers/profile/:email
+// @desc    Get driver by email
+// @access  Public
+router.get('/profile/:email', async (req, res) => {
+  try {
+    const { email } = req.params;
+    const driver = await Driver.findOne({ email: email.toLowerCase() })
+      .select('-__v');
+
+    if (!driver) {
+      return res.status(404).json({ error: 'Driver not found' });
+    }
+
+    res.json({
+      success: true,
+      driver: driver
+    });
+  } catch (error) {
+    console.error('Error fetching driver:', error);
     res.status(500).json({ error: 'Server error' });
   }
 });
